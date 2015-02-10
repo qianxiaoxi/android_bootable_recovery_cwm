@@ -1012,7 +1012,8 @@ main(int argc, char **argv) {
     device_ui_init(&ui_parameters);
     ui_init();
     ui_print(EXPAND(RECOVERY_VERSION)"\n");
-	ui_print("Compiled by Xiaolu("EXPAND(RECOVERY_BUILD_DATE)")\n");
+	ui_print("Builder: "EXPAND(RECOVERY_BUILDER)"\n");
+	ui_print("Date: "EXPAND(RECOVERY_BUILD_DATE)"\n");
 	__system("/sbin/postrecoveryboot.sh");
 
 //#ifdef BOARD_RECOVERY_SWIPE
