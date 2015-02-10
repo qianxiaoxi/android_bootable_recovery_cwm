@@ -1019,7 +1019,7 @@ main(int argc, char **argv) {
 //#ifdef BOARD_RECOVERY_SWIPE
 //#ifndef BOARD_TOUCH_RECOVERY
     //display directions for swipe controls
-    ui_print("上下划改变选项,左右划返回确认.\n");
+    // ui_print("上下划改变选项,左右划返回确认.\n");
 //#endif
 //#endif
 
