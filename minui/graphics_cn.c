@@ -53,7 +53,6 @@
 #endif
 
 #define NUM_BUFFERS 2
-#define PAGE_ALIGN(n) ((n + PAGE_SIZE - 1) & PAGE_MASK)
 #define ALIGN(x, align) (((x) + ((align)-1)) & ~((align)-1))
 #define MAX_DISPLAY_DIM  2048
 static GGLSurface font_ftex;
@@ -235,8 +234,7 @@ static int get_framebuffer(GGLSurface *fb)
     fb->stride = fi.line_length/PIXEL_SIZE;
     fb->format = PIXEL_FORMAT;
     if (!has_overlay) {
-        // fb->data = (void*) (((unsigned) bits) + vi.yres * fi.line_length);
-        fb->data = (void*) (((unsigned) bits) + PAGE_ALIGN(vi.yres * fi.line_length));
+        fb->data = (void*) (((unsigned) bits) + vi.yres * fi.line_length);
         memset(fb->data, 0, vi.yres * fi.line_length);
     }
 
