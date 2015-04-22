@@ -84,14 +84,14 @@ void *button_vibrate_thread(void *args) {
     close(fd);
     return ((void *)ret);
 }
-
+/*
 int vibrate(int timeout_ms) {
     pthread_t vibrate_thread;
     int ret;
     ret = pthread_create(&vibrate_thread, NULL, &button_vibrate_thread, (void *)timeout_ms);
     return ret;
 }
-
+*/
 int ev_init(ev_callback input_cb, void *data)
 {
     DIR *dir;

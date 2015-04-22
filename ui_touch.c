@@ -665,12 +665,12 @@ static void handle_release(input_device *dev, struct input_event *ev) {
             ev->type = EV_KEY;
             ev->code = KEY_ENTER;
             ev->value = 2;
-            vibrate(VIBRATOR_TIME_MS);
+            //vibrate(VIBRATOR_TIME_MS);
         } else if(dev->slide_left == 1) {
             ev->type = EV_KEY;
             ev->code = KEY_BACK;
             ev->value = 2;
-            vibrate(VIBRATOR_TIME_MS);
+            //vibrate(VIBRATOR_TIME_MS);
         }
     }
 #ifdef USE_VIRTUAL_KEY
@@ -678,7 +678,7 @@ static void handle_release(input_device *dev, struct input_event *ev) {
         ev->type = EV_KEY;
         ev->code=ui_get_virtualkey_pressed(dev);
         ev->value = 2;
-        vibrate(VIBRATOR_TIME_MS);
+        //vibrate(VIBRATOR_TIME_MS);
     }
     //clear button pressed down effect.
     if (virtualkey_pressed == 1 && ui_handle_key(ev->code, 1) == NO_ACTION) {

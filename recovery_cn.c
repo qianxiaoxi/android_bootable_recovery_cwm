@@ -1016,12 +1016,12 @@ main(int argc, char **argv) {
 	ui_print("日期："EXPAND(RECOVERY_BUILD_DATE)"\n");
 	__system("/sbin/postrecoveryboot.sh");
 
-//#ifdef BOARD_RECOVERY_SWIPE
-//#ifndef BOARD_TOUCH_RECOVERY
-    //display directions for swipe controls
-    // ui_print("上下划改变选项,左右划返回确认.\n");
-//#endif
-//#endif
+#ifdef BOARD_RECOVERY_SWIPE
+#ifndef BOARD_TOUCH_RECOVERY
+    // display directions for swipe controls
+    ui_print("上下划改变选项,左右划返回确认.\n");
+#endif
+#endif
 
     load_volume_table();
     process_volumes();
