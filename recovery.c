@@ -79,6 +79,13 @@ extern UIParameters ui_parameters;    // from ui.c
 
 #ifdef QCOM_HARDWARE
 static void parse_t_daemon_data_files();
+// time settings
+static void log_current_system_time();
+static void set_system_time();
+static void apply_time_zone();
+struct CWMSettingsLongIntValues t_zone = { "t_zone", 0 };
+struct CWMSettingsLongIntValues t_zone_offset = { "t_zone_offset", 0 };
+struct CWMSettingsIntValues use_dst_time = { "use_dst_time", 0 };
 #endif
 /*
  * The recovery tool communicates with the main system through /cache files.
@@ -1031,6 +1038,7 @@ main(int argc, char **argv) {
     setup_legacy_storage_paths();
 #ifdef QCOM_HARDWARE
     parse_t_daemon_data_files();
+	apply_time_zone();
 #endif
     LOGI("Processing arguments.\n");
     ensure_path_mounted(LAST_LOG_FILE);
@@ -1212,6 +1220,125 @@ void set_perf_mode(int on) {
 
 #ifdef QCOM_HARDWARE
 // copy from philz cwm recovery
+/* Start check and apply time zone */
+//
+// "(UTC -11) Samoa, Midway Island">BST11;BDT
+// "(UTC -10) Hawaii"                          HST10;HDT
+// "(UTC -9) Alaska"                           AST9;ADT
+// "(UTC -8) Pacific Time"                     PST8;PDT
+// "(UTC -7) Mountain Time"                    MST7;MDT
+// "(UTC -6) Central Time"                     CST6;CDT
+// "(UTC -5) Eastern Time"                     EST5;EDT
+// "(UTC -4) Atlantic Time"                    AST4;ADT
+// "(UTC -3) Brazil, Buenos Aires"             GRNLNDST3;GRNLNDDT
+// "(UTC -2) Mid-Atlantic"                     FALKST2;FALKDT
+// "(UTC -1) Azores, Cape Verde"               AZOREST1;AZOREDT
+// "(UTC  0) London, Dublin, Lisbon"           GMT0;BST
+// "(UTC +1) Berlin, Brussels, Paris"          NFT-1;DFT
+// "(UTC +2) Athens, Istanbul, South Africa"   WET-2;WET
+// "(UTC +3) Moscow, Baghdad"                  SAUST-3;SAUDT
+// "(UTC +4) Abu Dhabi, Tbilisi, Muscat"       WST-4;WDT
+// "(UTC +5) Yekaterinburg, Islamabad"         PAKST-5;PAKDT
+// "(UTC +6) Almaty, Dhaka, Colombo"           TASHST-6;TASHDT
+// "(UTC +7) Bangkok, Hanoi, Jakarta"          THAIST-7;THAIDT
+// "(UTC +8) Beijing, Singapore, Hong Kong"    TAIST-8;TAIDT
+// "(UTC +9) Tokyo, Seoul, Yakutsk"            JST-9;JSTDT
+// "(UTC +10) Eastern Australia, Guam"         EET-10;EETDT
+// "(UTC +11) Vladivostok, Solomon Islands"    MET-11;METDT
+// "(UTC +12) Auckland, Wellington, Fiji"      NZST-12;NZDT
+
+// write current system time to log
+static void log_current_system_time() {
+    char time_string[50];
+    struct tm *timeptr;
+    time_t seconds;
+    seconds = time(NULL);
+    timeptr = localtime(&seconds);
+
+    if (timeptr != NULL) {
+        strftime(time_string, sizeof(time_string), "%Y-%m-%d %H:%M:%S", timeptr);
+        LOGI("Current time: %s (UTC %s%ld:%02ld) %s\n", time_string, t_zone.value <= 0 ? "" : "+",
+                t_zone.value, t_zone_offset.value, use_dst_time.value ? "DST" : "");
+    } else {
+        LOGI("Current time: localtime() error\n");
+    }
+}
+
+// set_system_time() is called from apply_time_zone() or when setting use_dst_time.value and t_zone_offset.value in menus
+// on start, it is called from apply_time_zone()
+// it applies the time zone environment variables
+static void set_system_time() {
+    char* utc_t_zone_list[] = {
+        "BST11;BDT",
+        "HST10;HDT",
+        "AST9;ADT",
+        "PST8;PDT",
+        "MST7;MDT",
+        "CST6;CDT",
+        "EST5;EDT",
+        "AST4;ADT",
+        "GRNLNDST3;GRNLNDDT",
+        "FALKST2;FALKDT",
+        "AZOREST1;AZOREDT",
+        "GMT0;BST",
+        "NFT-1;DFT",
+        "WET-2;WET",
+        "SAUST-3;SAUDT",
+        "WST-4;WDT",
+        "PAKST-5;PAKDT",
+        "TASHST-6;TASHDT",
+        "THAIST-7;THAIDT",
+        "TAIST-8;TAIDT",
+        "JST-9;JSTDT",
+        "EET-10;EETDT",
+        "MET-11;METDT",
+        "NZST-12;NZDT",
+        NULL
+    };
+
+    // parse to get time zone
+    char time_string[50];
+    char t_zone_string[50];
+    char dst_string[50];
+    char *ptr;
+    strcpy(time_string, utc_t_zone_list[t_zone.value + 11]);
+    ptr = strtok(time_string, ";");
+    strcpy(t_zone_string, ptr);
+    ptr = strtok(NULL, ";");
+    strcpy(dst_string, ptr);
+    if (t_zone_offset.value != 0) {
+        char offset[10];
+        sprintf(offset, ":%ld", t_zone_offset.value);
+        strcat(t_zone_string, offset);
+    }
+    if (use_dst_time.value)
+        strcat(t_zone_string, dst_string);
+
+    // apply time through TZ environment variable
+    setenv("TZ", t_zone_string, 1);
+    tzset();
+
+    // log current system time
+    log_current_system_time();
+}
+
+// Apply Time Zone
+// called on recovery start or when changing time zone in menu
+// on recovery start, it will read and set t_zone.value, t_zone_offset.value and use_dst_time.value values
+// when called from time zone menu, it will only write and apply t_zone.value
+// system time is set when calling set_system_time()
+static void apply_time_zone() {
+        // called on recovery start, read values and apply time
+        // read user config for t_zone.value in UTC hours offset
+        char value[PROPERTY_VALUE_MAX];
+        t_zone.value = 8;
+        t_zone_offset.value = 0;
+        use_dst_time.value = 0;
+        set_system_time();
+}
+
+/* Start Qualcom Time Fixes */
+// parse the time daemon data files (credits to TeamWin)
 static void parse_t_daemon_data_files() {
     // Devices with Qualcomm Snapdragon 800 do some shenanigans with RTC.
     // They never set it, it just ticks forward from 1970-01-01 00:00,
@@ -1285,7 +1412,7 @@ static void parse_t_daemon_data_files() {
         fclose(f);
         LOGI("applying rtc time %ld\n", rtc_offset);
     }
-    LOGI("setting time offset from file %s, offset %llu\n", ats_path, offset);
+    LOGI("parse_t_daemon_data_files: Setting time offset from file %s, offset %llu\n", ats_path, offset);
 
     gettimeofday(&tv, NULL);
     tv.tv_sec += offset / 1000;
@@ -1297,5 +1424,7 @@ static void parse_t_daemon_data_files() {
     }
 
     settimeofday(&tv, NULL);
+    log_current_system_time();
 }
+// ------- End Qualcom Time Fixes
 #endif

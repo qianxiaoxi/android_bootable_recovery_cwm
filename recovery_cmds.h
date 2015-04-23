@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+#ifdef QCOM_HARDWARE
+// time settings
+struct CWMSettingsIntValues {
+    const char key[56];
+    int value;
+};
+struct CWMSettingsLongIntValues {
+    const char key[56];
+    long int value;
+};
+struct CWMSettingsLongIntValues t_zone;
+struct CWMSettingsLongIntValues t_zone_offset;
+struct CWMSettingsIntValues use_dst_time;
+#endif
+
 #ifndef _RECOVERY_CMDS_H
 #define _RECOVERY_CMDS_H
 
