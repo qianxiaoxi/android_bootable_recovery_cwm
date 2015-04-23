@@ -518,12 +518,14 @@ static void draw_screen_locked(void) {
             char batt_text[40];
             batt_level = get_batt_stats();
 
-            /*struct tm *current;
+            struct tm *current;
             time_t now;
-            now = time(NULL); // add 2 hours
+            now = time(NULL);
             current = localtime(&now);
+
+            if (now != NULL && now > 946684800)  // timestamp of 2000-01-01 00:00:00
             sprintf(batt_text, "[%d%% %02D:%02D]", batt_level, current->tm_hour, current->tm_min);
-            if (now == NULL)*/
+            else
             sprintf(batt_text, " [%d%%]", batt_level);
 
             gr_color(menuTextColor[0], menuTextColor[1], menuTextColor[2], menuTextColor[3]);
