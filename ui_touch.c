@@ -52,7 +52,7 @@ static int gShowBackButton = 0;
 #define MAX_ROWS 24
 #define MENU_MAX_COLS 64
 #define MENU_MAX_ROWS 250
-#define MENU_ITEM_HEADER " > "
+#define MENU_ITEM_HEADER " - "
 #define MENU_ITEM_HEADER_LENGTH strlen(MENU_ITEM_HEADER)
 
 #define MIN_LOG_ROWS 3
