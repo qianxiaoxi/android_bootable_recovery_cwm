@@ -29,7 +29,11 @@ static int update_length = 0;
 
 int remember_firmware_update(const char *type, const char *data, int length) {
     if (update_type != NULL || update_data != NULL) {
-        LOGE("Multiple firmware images\n");
+#ifdef USE_CHINESE_FONT
+    LOGE("多个固件镜像\n");
+#else
+    LOGE("Multiple firmware images\n");
+#endif
         return -1;
     }
 
@@ -133,6 +137,10 @@ int maybe_install_firmware_update(const char *send_intent) {
     reboot(RB_AUTOBOOT);
 
     // Can't reboot?  WTF?
+#ifdef USE_CHINESE_FONT
+    LOGE("无法重启\n");
+#else
     LOGE("Can't reboot\n");
+#endif
     return -1;
 }

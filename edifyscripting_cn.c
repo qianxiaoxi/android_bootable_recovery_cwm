@@ -89,7 +89,7 @@ Value* UIPrintFn(const char* name, State* state, int argc, Expr* argv[]) {
 
 Value* RunProgramFn(const char* name, State* state, int argc, Expr* argv[]) {
     if (argc < 1) {
-        return ErrorAbort(state, "%s() expects at least 1 arg", name);
+        return ErrorAbort(state, "%s() 需要最少 1 个参数", name);
     }
     char** args = ReadVarArgs(state, argc, argv);
     if (args == NULL) {
@@ -136,7 +136,7 @@ Value* RunProgramFn(const char* name, State* state, int argc, Expr* argv[]) {
 Value* FormatFn(const char* name, State* state, int argc, Expr* argv[]) {
     char* result = NULL;
     if (argc != 1) {
-        return ErrorAbort(state, "%s() expects 1 arg, got %d", name, argc);
+        return ErrorAbort(state, "%s() 期望的参数为 1 个，但是调用时却使用了 %d 个", name, argc);
     }
     
     char *path;
@@ -169,7 +169,7 @@ done:
 Value* BackupFn(const char* name, State* state, int argc, Expr* argv[]) {
     char* result = NULL;
     if (argc != 1) {
-        return ErrorAbort(state, "%s() expects 1 args, got %d", name, argc);
+        return ErrorAbort(state, "%s() 期望的参数为 1 个，但是调用时却使用了 %d 个", name, argc);
     }
     char* path;
     if (ReadArgs(state, argv, 1, &path) < 0) {
@@ -184,7 +184,7 @@ Value* BackupFn(const char* name, State* state, int argc, Expr* argv[]) {
 
 Value* RestoreFn(const char* name, State* state, int argc, Expr* argv[]) {
     if (argc < 1) {
-        return ErrorAbort(state, "%s() expects at least 1 arg", name);
+        return ErrorAbort(state, "%s() 需要最少 1 个参数", name);
     }
     char** args = ReadVarArgs(state, argc, argv);
     if (args == NULL) {
@@ -232,7 +232,7 @@ Value* RestoreFn(const char* name, State* state, int argc, Expr* argv[]) {
 Value* InstallZipFn(const char* name, State* state, int argc, Expr* argv[]) {
     char* result = NULL;
     if (argc != 1) {
-        return ErrorAbort(state, "%s() expects 1 args, got %d", name, argc);
+        return ErrorAbort(state, "%s() 期望的参数为 1 个，但是调用时却使用了 %d 个", name, argc);
     }
     char* path;
     if (ReadArgs(state, argv, 1, &path) < 0) {
@@ -248,7 +248,7 @@ Value* InstallZipFn(const char* name, State* state, int argc, Expr* argv[]) {
 Value* MountFn(const char* name, State* state, int argc, Expr* argv[]) {
     char* result = NULL;
     if (argc != 1) {
-        return ErrorAbort(state, "%s() expects 1 args, got %d", name, argc);
+        return ErrorAbort(state, "%s() 期望的参数为 1 个，但是调用时却使用了 %d 个", name, argc);
     }
     char* path;
     if (ReadArgs(state, argv, 1, &path) < 0) {
@@ -373,7 +373,7 @@ static int run_script(char* filename) {
     // supposedly not necessary, but let's be safe.
     script_data[script_len] = '\0';
     fclose(file);
-    LOGI("Running script:\n");
+    LOGI("执行脚本:\n");
     LOGI("\n%s\n", script_data);
 
     int ret = run_script_from_buffer(script_data, script_len, filename);
@@ -399,7 +399,7 @@ int run_and_remove_extendedcommand() {
     }
     remove("/sdcard/clockworkmod/.recoverycheckpoint");
     if (i == 0) {
-        ui_print("Timed out waiting for SD card... continuing anyways.");
+        ui_print("等待 SD 卡超时... 仍然继续。");
     }
 
     ui_print("验证SD卡标记...\n");
@@ -424,7 +424,7 @@ int run_and_remove_extendedcommand() {
     int ret;
 #ifdef I_AM_KOUSH
     if (0 != (ret = before_run_script(tmp))) {
-        ui_print("Error processing ROM Manager script. Please verify that you are performing the backup, restore, or ROM installation from ROM Manager v4.4.0.0 or higher.\n");
+        ui_print("处理 ROM Manager 脚本时出错。请检查你要执行的备份、还原或是刷机操作是使用 ROM Manager v4.4.0.0 或更高版本进行的。\n");
         return ret;
     }
 #endif

@@ -31,12 +31,12 @@ char* MENU_ITEMS[] = { "reboot system now",
                        "advanced",
                        NULL };
 #else
-char* MENU_ITEMS[] = { "重启设备",
+char* MENU_ITEMS[] = { "立即重启系统",
                        "安装ZIP刷机包",
-                       "清除数据恢复出厂",
-                       "清除Cache分区",
-                       "备份和还原备份",
-                       "挂载和大容量储存",
+                       "清除数据/恢复出厂设置",
+                       "清除Cache缓存分区",
+                       "备份和还原",
+                       "挂载及 U 盘模式",
                        "高级选项",
                        NULL };
 #endif

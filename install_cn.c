@@ -54,48 +54,48 @@ handle_firmware_update(char* type, char* filename, ZipArchive* zip) {
     if (strncmp(filename, "PACKAGE:", 8) == 0) {
         entry = mzFindZipEntry(zip, filename+8);
         if (entry == NULL) {
-            LOGE("Failed to find \"%s\" in package", filename+8);
+            LOGE("无法在刷机包中找到 \"%s\"", filename+8);
             return INSTALL_ERROR;
         }
         data_size = entry->uncompLen;
     } else {
         struct stat st_data;
         if (stat(filename, &st_data) < 0) {
-            LOGE("Error stat'ing %s: %s\n", filename, strerror(errno));
+            LOGE("统计时出错 %s: %s\n", filename, strerror(errno));
             return INSTALL_ERROR;
         }
         data_size = st_data.st_size;
     }
 
-    LOGI("type is %s; size is %d; file is %s\n",
+    LOGI("类型为 %s; 大小为 %d; 文件为 %s\n",
          type, data_size, filename);
 
     char* data = malloc(data_size);
     if (data == NULL) {
-        LOGI("Can't allocate %d bytes for firmware data\n", data_size);
+        LOGI("无法为固件数据分配 %d 字节的空间\n", data_size);
         return INSTALL_ERROR;
     }
 
     if (entry) {
         if (mzReadZipEntry(zip, entry, data, data_size) == false) {
-            LOGE("Failed to read \"%s\" from package", filename+8);
+            LOGE("无法读取刷机包中的 \"%s\"", filename+8);
             return INSTALL_ERROR;
         }
     } else {
         FILE* f = fopen(filename, "rb");
         if (f == NULL) {
-            LOGE("Failed to open %s: %s\n", filename, strerror(errno));
+            LOGE("无法打开 %s: %s\n", filename, strerror(errno));
             return INSTALL_ERROR;
         }
         if (fread(data, 1, data_size, f) != data_size) {
-            LOGE("Failed to read firmware data: %s\n", strerror(errno));
+            LOGE("无法读取固件数据: %s\n", strerror(errno));
             return INSTALL_ERROR;
         }
         fclose(f);
     }
 
     if (remember_firmware_update(type, data, data_size)) {
-        LOGE("Can't store %s image\n", type);
+        LOGE("无法保存 %s 镜像\n", type);
         free(data);
         return INSTALL_ERROR;
     }
@@ -125,7 +125,7 @@ static int set_legacy_props() {
     }
 
     if (rename(DEV_PROP_PATH, DEV_PROP_BACKUP_PATH) != 0) {
-        LOGE("Could not rename properties path: %s\n", DEV_PROP_PATH);
+        LOGE("无法重命名属性设置文件路径：%s\n", DEV_PROP_PATH);
         return -1;
     } else {
         legacy_props_path_modified = true;
@@ -136,7 +136,7 @@ static int set_legacy_props() {
 
 static int unset_legacy_props() {
     if (rename(DEV_PROP_BACKUP_PATH, DEV_PROP_PATH) != 0) {
-        LOGE("Could not rename properties path: %s\n", DEV_PROP_BACKUP_PATH);
+        LOGE("无法重命名属性设置文件路径：%s\n", DEV_PROP_BACKUP_PATH);
         return -1;
     } else {
         legacy_props_path_modified = false;
@@ -160,10 +160,11 @@ try_update_binary(const char *path, ZipArchive *zip) {
         const ZipEntry* update_script_entry =
                 mzFindZipEntry(zip, ASSUMED_UPDATE_SCRIPT_NAME);
         if (update_script_entry != NULL) {
-            ui_print("Amend scripting (update-script) is no longer supported.\n");
-            ui_print("Amend scripting was deprecated by Google in Android 1.5.\n");
-            ui_print("It was necessary to remove it when upgrading to the ClockworkMod 3.0 Gingerbread based recovery.\n");
-            ui_print("Please switch to Edify scripting (updater-script and update-binary) to create working update zip packages.\n");
+            ui_print("Amend 格式的脚本(update-script)现在已不被支持。\n");
+            ui_print("Amend 格式的脚本自 Android 1.5 起已被谷歌取消支持。\n");
+            ui_print("当使用高于 3.0 版本的 ClockworkMod 时，需要移除 Amend 格式的脚本。\n");
+            ui_print("请将脚本转换为 Edify 格式的脚本(updater-script 加 update-binary)以便做出可以使用的刷机包。\n");
+
             return INSTALL_UPDATE_BINARY_MISSING;
         }
 
@@ -176,14 +177,14 @@ try_update_binary(const char *path, ZipArchive *zip) {
     int fd = creat(binary, 0755);
     if (fd < 0) {
         mzCloseZipArchive(zip);
-        LOGE("Can't make %s\n", binary);
+        LOGE("无法创建 %s\n", binary);
         return 1;
     }
     bool ok = mzExtractZipEntryToFile(zip, binary_entry, fd);
     close(fd);
 
     if (!ok) {
-        LOGE("Can't copy %s\n", ASSUMED_UPDATE_BINARY_NAME);
+        LOGE("无法复制 %s\n", ASSUMED_UPDATE_BINARY_NAME);
         mzCloseZipArchive(zip);
         return 1;
     }
@@ -236,11 +237,12 @@ try_update_binary(const char *path, ZipArchive *zip) {
 
     /* Set legacy properties */
     if (foundsetperm && !foundsetmeta) {
-        LOGI("Using legacy property environment for update-binary...\n");
+        LOGI("为 update-binary 使用旧版属性环境...\n");
         if (set_legacy_props() != 0) {
-            LOGE("Legacy property environment did not init successfully. Properties may not be detected.\n");
+            LOGE("旧版属性环境初始化失败。可能未检测到属性设置文件。\n");
         } else {
-            LOGI("Legacy property environment initialized.\n");
+            LOGI("已初始化旧版属性环境。\n");
+
         }
     }
 
@@ -327,7 +329,7 @@ try_update_binary(const char *path, ZipArchive *zip) {
 
             if (type != NULL && filename != NULL) {
                 if (firmware_type != NULL) {
-                    LOGE("ignoring attempt to do multiple firmware updates");
+                    LOGE("忽略多个固件更新的操作");
                 } else {
                     firmware_type = strdup(type);
                     firmware_filename = strdup(filename);
@@ -341,7 +343,7 @@ try_update_binary(const char *path, ZipArchive *zip) {
                 ui_print("\n");
             }
         } else {
-            LOGE("unknown command [%s]\n", command);
+            LOGE("未知命令 [%s]\n", command);
         }
     }
     fclose(from_child);
@@ -352,14 +354,15 @@ try_update_binary(const char *path, ZipArchive *zip) {
     /* Unset legacy properties */
     if (legacy_props_path_modified) {
         if (unset_legacy_props() != 0) {
-            LOGE("Legacy property environment did not disable successfully. Legacy properties may still be in use.\n");
+            LOGE("未成功禁用旧版属性环境。旧版属性环境可能仍然在使用中。\n");
         } else {
-            LOGI("Legacy property environment disabled.\n");
+            LOGI("已禁用旧版属性环境。n");
+
         }
     }
 
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        LOGE("Error in %s\n(Status %d)\n", path, WEXITSTATUS(status));
+        LOGE("%s 中出错\n(状态 %d)\n", path, WEXITSTATUS(status));
         mzCloseZipArchive(zip);
         return INSTALL_ERROR;
     }
@@ -401,10 +404,10 @@ really_install_package(const char *path)
         }
     }
 
-    LOGI("Update location: %s\n", path);
+    LOGI("刷机包位置: %s\n", path);
 
     if (ensure_path_mounted(path) != 0) {
-        LOGE("Can't mount %s\n", path);
+        LOGE("无法挂载 %s\n", path);
         return INSTALL_CORRUPT;
     }
 
@@ -416,24 +419,24 @@ really_install_package(const char *path)
         int numKeys;
         Certificate* loadedKeys = load_keys(PUBLIC_KEYS_FILE, &numKeys);
         if (loadedKeys == NULL) {
-            LOGE("Failed to load keys\n");
+            LOGE("无法载入密钥\n");
             return INSTALL_CORRUPT;
         }
-        LOGI("%d key(s) loaded from %s\n", numKeys, PUBLIC_KEYS_FILE);
+        LOGI("%d 个密钥已从 %s 中载入\n", numKeys, PUBLIC_KEYS_FILE);
 
         // Give verification half the progress bar...
-        ui_print("校验刷机包签名...\n");
+        ui_print("正在校验刷机包...\n");
         ui_show_progress(
                 VERIFICATION_PROGRESS_FRACTION,
                 VERIFICATION_PROGRESS_TIME);
 
         err = verify_file(path, loadedKeys, numKeys);
         free(loadedKeys);
-        LOGI("verify_file returned %d\n", err);
+        LOGI("verify_file 返回 %d\n", err);
         if (err != VERIFY_SUCCESS) {
-            LOGE("签名检测失败\n");
+            LOGE("签名校验失败\n");
             ui_show_text(1);
-            if (!confirm_selection("安装不受信任的包?", "是的-安装"))
+            if (!confirm_selection("安装不受信任的刷机包？", "是 - 安装"))
                 return INSTALL_CORRUPT;
         }
     }
@@ -443,7 +446,7 @@ really_install_package(const char *path)
     ZipArchive zip;
     err = mzOpenZipArchive(path, &zip);
     if (err != 0) {
-        LOGE("Can't open %s\n(%s)\n", path, err != -1 ? strerror(err) : "bad");
+        LOGE("无法打开 %s\n(%s)\n", path, err != -1 ? strerror(err) : "已损坏");
         return INSTALL_CORRUPT;
     }
 
@@ -461,7 +464,7 @@ install_package(const char* path)
         fputs(path, install_log);
         fputc('\n', install_log);
     } else {
-        LOGE("failed to open last_install: %s\n", strerror(errno));
+        LOGE("无法打开 last_install: %s\n", strerror(errno));
     }
     int result = really_install_package(path);
     if (install_log) {

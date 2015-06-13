@@ -38,7 +38,7 @@ static void
 set_usb_driver(int enabled) {
     int fd = open("/sys/class/android_usb/android0/enable", O_WRONLY);
     if (fd < 0) {
-        printf("failed to open driver control: %s\n", strerror(errno));
+        printf("无法打开驱动控制器: %s\n", strerror(errno));
         return;
     }
 
@@ -50,11 +50,11 @@ set_usb_driver(int enabled) {
     }
 
     if (status < 0) {
-        printf("failed to set driver control: %s\n", strerror(errno));
+        printf("无法设置驱动控制器: %s\n", strerror(errno));
     }
 
     if (close(fd) < 0) {
-        printf("failed to close driver control: %s\n", strerror(errno));
+        printf("无法关闭驱动控制器: %s\n", strerror(errno));
     }
 }
 
@@ -85,7 +85,7 @@ void *adb_sideload_thread(void* v) {
 
     int status;
     waitpid(data->child, &status, 0);
-    LOGI("sideload process finished\n");
+    LOGI("sideload 进程已完成\n");
     
     ui_cancel_wait_key();
 
@@ -93,7 +93,7 @@ void *adb_sideload_thread(void* v) {
         ui_print("状态 %d\n", WEXITSTATUS(status));
     }
 
-    LOGI("sideload thread finished\n");
+    LOGI("sideload 线程已完成\n");
     return NULL;
 }
 
@@ -102,8 +102,8 @@ apply_from_adb() {
     stop_adbd();
     set_usb_driver(1);
 
-    ui_print("\n\nSideload已经开始,现在可以发送刷机包到设备上.\n"
-              "命令:\nadb sideload <filename>\n\n");
+    ui_print("\n\nSideload模式已经开始,现在可以发送刷机包到设备上.\n"
+              "命令:\nadb sideload <文件名>\"...\n\n");
 
     struct sideload_waiter_data data;
     if ((data.child = fork()) == 0) {
@@ -153,7 +153,7 @@ apply_from_adb() {
 
 #ifdef ENABLE_LOKI
     else if (loki_support_enabled) {
-        ui_print("检测loki-fying需求");
+        ui_print("检查是否需要 loki-fying");
         install_status = loki_check();
         if (install_status != INSTALL_SUCCESS)
             ui_set_background(BACKGROUND_ICON_ERROR);

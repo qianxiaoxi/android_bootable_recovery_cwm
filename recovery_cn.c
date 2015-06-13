@@ -620,11 +620,11 @@ get_menu_selection(const char** headers, char** items, int menu_only,
                 wrap_count = 0;
                 if (ui_get_rainbow_mode()) {
                     ui_set_rainbow_mode(0);
-                    ui_print("彩虹模式已关闭\n");
+                    ui_print("彩虹模式已关闭!\n");
                 }
                 else {
                     ui_set_rainbow_mode(1);
-                    ui_print("彩虹模式已开启\n");
+                    ui_print("彩虹模式已开启!\n");
                 }
             }
         }
@@ -768,7 +768,7 @@ update_directory(const char* path, const char* unmount_when_done) {
 
 static void
 wipe_data(int confirm) {
-    if (confirm && !confirm_selection( "确认清除所有的用户数据?", "是的,清除所有用户数据"))
+    if (confirm && !confirm_selection( "确认清除所有的用户数据?", "是 - 清除所有用户数据"))
         return;
 
     ui_print("\n-- 清除数据...\n");
@@ -780,7 +780,7 @@ wipe_data(int confirm) {
     }
     if (volume_for_path("/sd-ext") != NULL) erase_volume("/sd-ext");
     erase_volume(get_android_secure_path());
-    ui_print("数据清除完毕.\n");
+    ui_print("数据清除完毕。\n");
 }
 
 static void headless_wait() {
@@ -828,7 +828,7 @@ prompt_and_wait() {
                     break;
 
                 case ITEM_WIPE_CACHE:
-                    if (confirm_selection("确认清除?", "是的，清除cache"))
+                    if (confirm_selection("确认清除?", "是 - 清除cache"))
                     {
                         ui_print("\n-- 清除cache...\n");
                         erase_volume("/cache");
@@ -1014,7 +1014,7 @@ main(int argc, char **argv) {
     // If these fail, there's not really anywhere to complain...
     freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
     freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
-    printf("Starting recovery on %s\n", ctime(&start));
+    printf("recovery 启动时间：%s\n", ctime(&start));
 
     device_ui_init(&ui_parameters);
     ui_init();
@@ -1038,7 +1038,7 @@ main(int argc, char **argv) {
     parse_t_daemon_data_files();
     apply_time_zone();
 #endif
-    LOGI("Processing arguments.\n");
+    LOGI("正在处理参数。\n");
     ensure_path_mounted(LAST_LOG_FILE);
     rotate_last_logs(10);
     get_args(&argc, &argv);
@@ -1050,7 +1050,7 @@ main(int argc, char **argv) {
     int headless = 0;
     int shutdown_after = 0;
 
-    LOGI("Checking arguments.\n");
+    LOGI("正在检查参数。\n");
     int arg;
     while ((arg = getopt_long(argc, argv, "", OPTIONS, NULL)) != -1) {
         switch (arg) {
@@ -1074,7 +1074,7 @@ main(int argc, char **argv) {
         case 'l': sideload = 1; break;
         case 'p': shutdown_after = 1; break;
         case '?':
-            LOGE("Invalid command argument\n");
+            LOGE("无效的命令参数\n");
             continue;
         }
     }
@@ -1086,7 +1086,7 @@ main(int argc, char **argv) {
     sehandle = selabel_open(SELABEL_CTX_FILE, seopts, 1);
 
     if (!sehandle) {
-        fprintf(stderr, "Warning: No file_contexts\n");
+        fprintf(stderr, "警告：无 file_contexts\n");
         //ui_print("Warning:  No file_contexts\n");
     }
 
@@ -1124,7 +1124,7 @@ main(int argc, char **argv) {
         status = install_package(update_package);
         if (status != INSTALL_SUCCESS) {
             copy_logs();
-            ui_print("安装中断.\n");
+            ui_print("刷机已中止。\n");
         } else if (!strcmp(TARGET_DEVICE, "A0001")) { //hack for a0001 ota
             if (strstr(update_package, "/.OTA/"))
                 send_intent = "0";
@@ -1138,16 +1138,16 @@ main(int argc, char **argv) {
         if (wipe_cache && erase_volume("/cache")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) {
             copy_logs();
-            ui_print("数据清除失败.\n");
+            ui_print("数据清除失败。\n");
         }
     } else if (wipe_cache) {
         if (wipe_cache && erase_volume("/cache")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) {
             copy_logs();
-            ui_print("Cache清除失败.\n");
+            ui_print("Cache清除失败。\n");
         }
     } else {
-        LOGI("Checking for extendedcommand...\n");
+        LOGI("正在检查 extendedcommand...\n");
         status = INSTALL_ERROR;  // No command specified
         // we are starting up in user initiated recovery here
         // let's set up some default options
@@ -1159,7 +1159,7 @@ main(int argc, char **argv) {
         }
 
         if (extendedcommand_file_exists()) {
-            LOGI("Running extendedcommand...\n");
+            LOGI("正在执行 extendedcommand...\n");
             int ret;
             if (0 == (ret = run_and_remove_extendedcommand())) {
                 status = INSTALL_SUCCESS;
@@ -1169,7 +1169,7 @@ main(int argc, char **argv) {
                 handle_failure(ret);
             }
         } else {
-            LOGI("Skipping execution of extendedcommand, file not found...\n");
+            LOGI("跳过执行 extendedcommand，未找到文件...\n");
         }
     }
 

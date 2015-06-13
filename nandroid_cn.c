@@ -325,7 +325,7 @@ static int dedupe_compress_wrapper(const char* backup_path, const char* backup_f
 
     FILE *fp = __popen(tmp, "r");
     if (fp == NULL) {
-        ui_print("无法执行dedupe.\n");
+        ui_print("无法执行dedupe增量备份。\n");
         return -1;
     }
 
@@ -521,9 +521,9 @@ int nandroid_backup(const char* backup_path) {
         uint64_t bsize = sfs.f_bsize;
         uint64_t sdcard_free = bavail * bsize;
         uint64_t sdcard_free_mb = sdcard_free / (uint64_t)(1024 * 1024);
-        ui_print("剩余空间: %lluMB\n", sdcard_free_mb);
+        ui_print("SD 卡剩余空间: %lluMB\n", sdcard_free_mb);
         if (sdcard_free_mb < 150)
-            ui_print("可能没有足够的可用空间来完成备份...继续备份...\n");
+            ui_print("可能没有足够的空间完成备份... 继续...\n");
     }
     char tmp[PATH_MAX];
     ensure_directory(backup_path);
@@ -544,7 +544,7 @@ int nandroid_backup(const char* backup_path) {
         sprintf(tmp, "%s/wimax.%s.img", backup_path, serialno);
         ret = backup_raw_partition(vol->fs_type, vol->blk_device, tmp);
         if (0 != ret)
-            return print_and_error("导出WiMAX分区时出错!\n", NANDROID_ERROR_GENERAL);
+            return print_and_error("导出WiMAX 镜像时出错！\n", NANDROID_ERROR_GENERAL);
     }
 
     if (0 != (ret = nandroid_backup_partition(backup_path, "/system")))
@@ -576,10 +576,10 @@ int nandroid_backup(const char* backup_path) {
 
     vol = volume_for_path("/sd-ext");
     if (vol == NULL || 0 != stat(vol->blk_device, &s)) {
-        LOGI("没有sd-ext分区,跳过.\n");
+        LOGI("未找到 sd-ext。跳过对 sd-ext 的备份。\n");
     } else {
         if (0 != ensure_path_mounted("/sd-ext"))
-            LOGI("Could not mount sd-ext. sd-ext backup may not be supported on this device. Skipping backup of sd-ext.\n");
+            LOGI("无法挂载 sd-ext。此设备可能不支持对 sd-ext 进行备份，跳过对sd-ext的备份。\n");
         else if (0 != (ret = nandroid_backup_partition(backup_path, "/sd-ext")))
             return print_and_error(NULL, ret);
     }
@@ -606,7 +606,7 @@ int nandroid_backup(const char* backup_path) {
     sync();
     ui_set_background(BACKGROUND_ICON_CLOCKWORK);
     ui_reset_progress();
-    ui_print("\n备份完毕!\n");
+    ui_print("\n备份完成！\n");
     return 0;
 }
 
@@ -713,7 +713,7 @@ static int dedupe_extract_wrapper(const char* backup_file_image, const char* bac
     char path[PATH_MAX];
     FILE *fp = __popen(tmp, "r");
     if (fp == NULL) {
-        ui_print("无法执行dedupe命令.\n");
+        ui_print("无法执行dedupe增量备份.\n");
         return -1;
     }
 
@@ -975,15 +975,15 @@ int nandroid_restore(const char* backup_path, unsigned char flags) {
 
         struct stat st;
         if (0 != stat(tmp, &st)) {
-            ui_print("WARNING: WiMAX partition exists, but nandroid\n");
-            ui_print("         backup does not contain WiMAX image.\n");
-            ui_print("         You should create a new backup to\n");
-            ui_print("         protect your WiMAX keys.\n");
+            ui_print("警告：存在 WiMAX 分区，但是备份文件中\n");
+            ui_print("     不包含 WiMAX 镜像。\n");
+            ui_print("     你应该创建一个新的备份以保护你的\n");
+            ui_print("     WiMAX 密匙。\n");
         } else {
-            ui_print("Erasing WiMAX before restore...\n");
+            ui_print("正在执行还原前对 WiMAX 分区的清空...\n");
             if (0 != (ret = format_volume("/wimax")))
-                return print_and_error("Error while formatting wimax!\n", NANDROID_ERROR_GENERAL);
-            ui_print("Restoring WiMAX image...\n");
+					return print_and_error("格式化 wimax 分区出错！\n", NANDROID_ERROR_GENERAL);
+					ui_print("正在还原 WiMAX 分区...\n");
             if (0 != (ret = restore_raw_partition(vol->fs_type, vol->blk_device, tmp)))
                 return print_and_error(NULL, ret);
         }
@@ -1018,7 +1018,7 @@ int nandroid_restore(const char* backup_path, unsigned char flags) {
     sync();
     ui_set_background(BACKGROUND_ICON_CLOCKWORK);
     ui_reset_progress();
-    ui_print("\n还原完毕!\n");
+    ui_print("\n还原完成！\n");
     return 0;
 }
 
