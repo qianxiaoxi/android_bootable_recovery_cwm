@@ -530,6 +530,9 @@ copy_sideloaded_package(const char* original_path) {
 static const char**
 prepend_title(const char** headers) {
     const char* title[] = { EXPAND(RECOVERY_VERSION),
+
+                      EXPAND(RECOVERY_PRODUCT_MODEL)" 专用版",
+
                       "",
                       NULL };
 
@@ -1018,17 +1021,18 @@ main(int argc, char **argv) {
 
     device_ui_init(&ui_parameters);
     ui_init();
-    ui_print(EXPAND(RECOVERY_VERSION)"\n");
-	ui_print("编译："EXPAND(RECOVERY_BUILDER)"\n");
-	ui_print("日期："EXPAND(RECOVERY_BUILD_DATE)"\n");
+    ui_print("CWM中文触摸恢复系统 v6.0.5.1\n");
+    ui_print("编译作者："EXPAND(RECOVERY_BUILDER)"\n");
+    ui_print("编译时间："EXPAND(RECOVERY_BUILD_TIME)"\n");
+    ui_print("我的微博：http://weibo.com/u/1658492582\n");
 	__system("/sbin/postrecoveryboot.sh");
 
-#ifdef BOARD_RECOVERY_SWIPE
-#ifndef BOARD_TOUCH_RECOVERY
+//#ifdef BOARD_RECOVERY_SWIPE
+//#ifndef BOARD_TOUCH_RECOVERY
     // display directions for swipe controls
-    ui_print("上下划改变选项,左右划返回确认.\n");
-#endif
-#endif
+    ui_print("上下划改变选项,左划返回,右划确认。\n");
+//#endif
+//#endif
 
     load_volume_table();
     process_volumes();

@@ -530,6 +530,9 @@ copy_sideloaded_package(const char* original_path) {
 static const char**
 prepend_title(const char** headers) {
     const char* title[] = { EXPAND(RECOVERY_VERSION),
+
+                      "Only for "EXPAND(RECOVERY_PRODUCT_MODEL),
+
                       "",
                       NULL };
 
@@ -1020,17 +1023,17 @@ main(int argc, char **argv) {
     ui_init();
     ui_print(EXPAND(RECOVERY_VERSION)"\n");
 	ui_print("Builder: "EXPAND(RECOVERY_BUILDER)"\n");
-	ui_print("Date: "EXPAND(RECOVERY_BUILD_DATE)"\n");
+	ui_print("Date: "EXPAND(RECOVERY_BUILD_TIME)"\n");
 	__system("/sbin/postrecoveryboot.sh");
 
-#ifdef BOARD_RECOVERY_SWIPE
-#ifndef BOARD_TOUCH_RECOVERY
+//#ifdef BOARD_RECOVERY_SWIPE
+//#ifndef BOARD_TOUCH_RECOVERY
     //display directions for swipe controls
     ui_print("Swipe up/down to change selections.\n");
     ui_print("Swipe to the right for enter.\n");
     ui_print("Swipe to the left for back.\n");
-#endif
-#endif
+//#endif
+//#endif
 
     load_volume_table();
     process_volumes();
